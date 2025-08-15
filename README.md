@@ -94,10 +94,10 @@ docker-compose.yml
 ## 🖼 Screenshot
 *(Add your screenshots here)*
 ![Home/Dasboard](image.png)
-![Home2](image-1.png)
-![Add new task](image-2.png)
-![Context View and Add](image-3.png)
-![Django Category Frame List](image-4.png)
+![Home](image-1.png)
+![Add new](image-2.png)
+![Context View ](image-3.png)
+![Django Category Frame](image-4.png)
 ![Django Task list](image-5.png)
 ![Django Context Entry List](image-6.png)
 ---
