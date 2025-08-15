@@ -6,6 +6,8 @@ const API = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
 export default function ContextPage() {
   const [items, setItems] = useState([]);
   const [form, setForm] = useState({ content: "", source: "notes" });
+  const [loadingId, setLoadingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const load = () =>
     fetch(`${API}/api/contexts/`)
@@ -25,6 +27,40 @@ export default function ContextPage() {
     });
     setForm({ content: "", source: "notes" });
     load();
+  };
+
+  const runAISuggest = async (ctx) => {
+    setLoadingId(ctx.id);
+    try {
+      const res = await fetch(`${API}/api/ai/context-suggest/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: ctx.content, source: ctx.source }),
+      });
+      const data = await res.json();
+      if (data.suggestion) {
+        alert(`AI Suggestion:\n\n${data.suggestion}`);
+      } else {
+        alert("No suggestion found.");
+      }
+    } catch (err) {
+      alert("Error fetching AI suggestion: " + err.message);
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const deleteContext = async (ctx) => {
+    if (!confirm("Are you sure you want to delete this context?")) return;
+    setDeletingId(ctx.id);
+    try {
+      await fetch(`${API}/api/contexts/${ctx.id}/`, { method: "DELETE" });
+      setItems(items.filter((item) => item.id !== ctx.id));
+    } catch (err) {
+      alert("Error deleting context: " + err.message);
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -71,6 +107,24 @@ export default function ContextPage() {
             <div className="mt-2">{c.content}</div>
             <div className="mt-1 text-xs text-gray-600">
               {new Date(c.created_at).toLocaleString()}
+            </div>
+
+            <div className="flex gap-2 mt-3">
+              <button
+                className="px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 disabled:opacity-50"
+                onClick={() => runAISuggest(c)}
+                disabled={loadingId === c.id}
+              >
+                {loadingId === c.id ? "Thinking..." : "AI Suggest"}
+              </button>
+
+              <button
+                className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:opacity-50"
+                onClick={() => deleteContext(c)}
+                disabled={deletingId === c.id}
+              >
+                {deletingId === c.id ? "Deleting..." : "Delete"}
+              </button>
             </div>
           </div>
         ))}

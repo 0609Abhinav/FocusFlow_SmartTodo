@@ -93,3 +93,16 @@ def generate_suggestions(task: dict, contexts: list[dict], user_preferences: dic
         "enhanced_description": enhanced,
         "context_insights": ctx_insights,
     }
+def generate_context_suggestion(content: str, source: str = "context") -> str:
+    """
+    Generate a short actionable suggestion based on a single context entry.
+    """
+    llm = LLMClient()
+    prompt = (
+        f"Source: {source}\n"
+        f"Context: {content}\n\n"
+        "Give one short, clear, actionable suggestion based on this context. "
+        "If no action is needed, say 'No action required'."
+    )
+    ai = llm.complete(prompt)
+    return ai.strip() if ai else "No suggestion available."

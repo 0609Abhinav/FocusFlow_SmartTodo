@@ -48,6 +48,7 @@ export default function Dashboard() {
   const [filters, set] = useState({ status: "", category: "" });
   const [showModal, setShowModal] = useState(false);
   const [newTask, setNewTask] = useState({ title: "", description: "" });
+  const [loadingAI, setLoadingAI] = useState(false);
 
   const qs = new URLSearchParams(
     Object.entries(filters).filter(([, v]) => v)
@@ -70,6 +71,37 @@ export default function Dashboard() {
     setShowModal(false);
     setNewTask({ title: "", description: "" });
     mutate();
+  };
+
+  const deleteTask = async (id) => {
+    if (!confirm("Are you sure you want to delete this task?")) return;
+    await fetch(`${API}/api/tasks/${id}/`, { method: "DELETE" });
+    mutate();
+  };
+
+  const runAISuggest = async () => {
+    if (!newTask.title && !newTask.description) return;
+    setLoadingAI(true);
+    const payload = { task: newTask, contexts: [], current_load: 3 };
+    try {
+      const res = await fetch(`${API}/api/ai/suggest/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      setNewTask((t) => ({
+        ...t,
+        description: data.enhanced_description || t.description,
+        priority_score: data.priority_score,
+        deadline: data.deadline_suggestion,
+        tags: data.suggested_tags,
+      }));
+    } catch (err) {
+      console.error("AI Suggest error", err);
+    } finally {
+      setLoadingAI(false);
+    }
   };
 
   return (
@@ -153,13 +185,19 @@ export default function Dashboard() {
               )}
             </div>
 
-            <div className="mt-4">
+            <div className="mt-4 flex justify-between items-center">
               <Link
                 href={`/task/${t.id}`}
                 className="text-blue-600 hover:underline text-sm font-medium"
               >
                 View Details →
               </Link>
+              <button
+                onClick={() => deleteTask(t.id)}
+                className="text-red-600 text-sm hover:underline"
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))}
@@ -188,6 +226,13 @@ export default function Dashboard() {
               className="w-full p-2 border rounded mb-4 focus:ring-2 focus:ring-blue-400"
             />
             <div className="flex justify-end gap-3">
+              <button
+                onClick={runAISuggest}
+                disabled={loadingAI}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg disabled:opacity-50"
+              >
+                {loadingAI ? "Suggesting..." : "AI Suggest"}
+              </button>
               <button
                 onClick={() => setShowModal(false)}
                 className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg"

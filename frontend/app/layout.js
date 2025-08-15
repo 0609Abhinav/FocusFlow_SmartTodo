@@ -39,6 +39,13 @@ export default function RootLayout({ children }) {
               >
                 Context
               </a>
+              {/* AI Suggest Shortcut */}
+              <a
+                href="/task/new?ai=true"
+                className="px-3 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition"
+              >
+                + AI Suggest
+              </a>
             </nav>
           </header>
 
