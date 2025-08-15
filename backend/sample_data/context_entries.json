@@ -1,0 +1,32 @@
+[
+  {
+    "model": "tasks.contextentry",
+    "pk": 1,
+    "fields": {
+      "content": "Reminder: Friday client meeting 4 PM. Share bug fix progress.",
+      "source": "email",
+      "created_at": "2025-08-11T09:00:00Z",
+      "processed_insights": {}
+    }
+  },
+  {
+    "model": "tasks.contextentry",
+    "pk": 2,
+    "fields": {
+      "content": "WhatsApp: Can you send the demo by tomorrow? ASAP",
+      "source": "whatsapp",
+      "created_at": "2025-08-12T12:00:00Z",
+      "processed_insights": {}
+    }
+  },
+  {
+    "model": "tasks.contextentry",
+    "pk": 3,
+    "fields": {
+      "content": "Notes: reimburse travel expenses this week",
+      "source": "notes",
+      "created_at": "2025-08-10T08:00:00Z",
+      "processed_insights": {}
+    }
+  }
+]

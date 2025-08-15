@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15
+    container_name: smarttodo_db
+    restart: always
+    environment:
+      POSTGRES_USER: smarttodo
+      POSTGRES_PASSWORD: smarttodo
+      POSTGRES_DB: smarttodo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: smarttodo_backend
+    command: sh -c "python manage.py migrate && python manage.py loaddata sample_data/categories.json && python manage.py loaddata sample_data/tasks.json && python manage.py loaddata sample_data/context_entries.json && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=smarttodo
+      - DB_USER=smarttodo
+      - DB_PASSWORD=smarttodo
+      - AI_PROVIDER=lmstudio
+      - AI_BASE_URL=http://host.docker.internal:1234/v1
+      - AI_MODEL=your-model-name
+
+  frontend:
+    build: ./frontend
+    container_name: smarttodo_frontend
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_BASE=http://localhost:8000
+
+volumes:
+  postgres_data:
